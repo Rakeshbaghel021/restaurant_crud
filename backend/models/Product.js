@@ -17,6 +17,9 @@ const product = new mongoose.Schema(
     PricGross: {
       type: Number,
     },
+    ImageUrl: {
+      type: String,
+    },
   },
   {
     timestamps: true,

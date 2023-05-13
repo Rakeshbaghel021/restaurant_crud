@@ -42,7 +42,9 @@ function App() {
     PriceNet: "",
     Vat: 0,
     PricGross: "",
+    ImageUrl: null,
   });
+  console.log(product);
   const [open, setOpen] = useState(false);
   const [open2, setOpen2] = useState(false);
   const products = useSelector((state) => state.products);
@@ -51,7 +53,17 @@ function App() {
   console.log(openModelid);
 
   const handleSubmit = async (e) => {
-    dispatch(addNewProduct(product));
+    e.preventDefault();
+    const formData = new FormData();
+    console.log(formData);
+    formData.append("ProductName", product.ProductName);
+    formData.append("Quantity", product.Quantity);
+    formData.append("PriceNet", product.PriceNet);
+    formData.append("Vat", product.Vat);
+    formData.append("PricGross", product.PricGross);
+    formData.append("ImageUrl", product.ImageUrl);
+
+    dispatch(addNewProduct(formData));
     setOpen(false);
     setProduct({
       ProductName: "",
@@ -59,6 +71,7 @@ function App() {
       PriceNet: "",
       Vat: 0,
       PricGross: "",
+      ImageUrl: null,
     });
   };
 
@@ -74,9 +87,12 @@ function App() {
   };
 
   const handleUpadte = async () => {
-    await dispatch(updateProduct(openModelid._id, product));
+    console.log(product);
+    dispatch(updateProduct(openModelid._id, openModelid));
     setOpen2(false);
-    dispatch(getAllProducts());
+    setTimeout(() => {
+      dispatch(getAllProducts());
+    }, 1000);
   };
 
   const handleChange = (value) => {
@@ -89,13 +105,17 @@ function App() {
   }, [products.length, dispatch]);
 
   useEffect(() => {
-    setProduct({ ...product, PriceNet: product.PricGross - product.Vat / 100 });
+    setProduct({
+      ...product,
+      PriceNet: product.PricGross - (product.PricGross * product.Vat) / 100,
+    });
   }, [product.PricGross, product.Vat]);
 
   useEffect(() => {
-    setProduct({
+    setopenModelid({
       ...openModelid,
-      PriceNet: openModelid.PricGross - openModelid.Vat / 100,
+      PriceNet:
+        openModelid.PricGross - (openModelid.PricGross * openModelid.Vat) / 100,
     });
   }, [openModelid.PricGross, openModelid.Vat]);
   return (
@@ -423,21 +443,39 @@ function App() {
                           Price Net
                         </label>
                         <div className="mt-2">
-                          {product.PricGross - product.Vat / 100}
+                          {product.PricGross -
+                            (product.PricGross * product.Vat) / 100}
                           <input
                             type="text"
                             name="email"
                             value={product.PriceNet}
-                            // onChange={(e) => {
-                            //   console.log(e.target.value, "gugjgjgjgjg");
-                            //   setProduct({
-                            //     ...product,
-                            //     PriceNet: e.target.value,
-                            //   });
-                            // }}
                             id="email"
                             className="block w-full rounded-md px-3 border-0 mb-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                             placeholder="Enter Price Net"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="email"
+                          className="block text-sm font-medium leading-6 text-gray-900"
+                        >
+                          Product Image
+                        </label>
+                        <div className="mt-2">
+                          <input
+                            type="file"
+                            name="email"
+                            onChange={(e) => {
+                              console.log(e.target.files[0]);
+                              setProduct({
+                                ...product,
+                                ImageUrl: e.target.files[0],
+                              });
+                            }}
+                            id="email"
+                            className="block w-full rounded-md px-3 border-0 py-1.5 mb-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            placeholder="Enter Pric Gross"
                           />
                         </div>
                       </div>
@@ -513,7 +551,7 @@ function App() {
                             name="email"
                             defaultValue={openModelid.ProductName}
                             onChange={(e) =>
-                              setProduct({
+                              setopenModelid({
                                 ...openModelid,
                                 ProductName: e.target.value,
                               })
@@ -536,7 +574,7 @@ function App() {
                             type="number"
                             defaultValue={openModelid.Quantity}
                             onChange={(e) =>
-                              setProduct({
+                              setopenModelid({
                                 ...openModelid,
                                 Quantity: e.target.value,
                               })
@@ -563,7 +601,7 @@ function App() {
                             paddingBottom: "8px",
                           }}
                           onChange={(value) =>
-                            setProduct({
+                            setopenModelid({
                               ...openModelid,
                               Vat: value,
                             })
@@ -597,7 +635,7 @@ function App() {
                             name="email"
                             defaultValue={openModelid.PricGross}
                             onChange={(e) =>
-                              setProduct({
+                              setopenModelid({
                                 ...openModelid,
                                 PricGross: e.target.value,
                               })
@@ -687,6 +725,12 @@ function App() {
                             scope="col"
                             className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-3"
                           >
+                            Product Image
+                          </th>
+                          <th
+                            scope="col"
+                            className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-3"
+                          >
                             Product Name
                           </th>
                           <th
@@ -730,6 +774,13 @@ function App() {
                               itemIdx % 2 === 0 ? undefined : "bg-gray-50"
                             }
                           >
+                            <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-3">
+                              <img
+                                className="w-8 h-8 rounded"
+                                src={item.ImageUrl}
+                                alt=""
+                              />
+                            </td>
                             <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-3">
                               {item.ProductName}
                             </td>

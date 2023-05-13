@@ -13,7 +13,7 @@ export const addNewProduct = (data) => async (dispatch) => {
   console.log(data);
 
   try {
-    const res = await axios.post(`${API_URL}/product`, { data });
+    const res = await axios.post(`${API_URL}/product`, data);
     console.log(data);
     dispatch({ type: ADDNEW_PRODUCT, payload: res.data });
   } catch (error) {
@@ -33,7 +33,7 @@ export const getAllProducts = () => async (dispatch) => {
 export const updateProduct = (id, data) => async (dispatch) => {
   console.log(id, data);
   try {
-    const res = await axios.put(`${API_URL}/product/${id}`, { data });
+    const res = await axios.put(`${API_URL}/product/${id}`, data);
     console.log(res.data);
 
     dispatch({ type: UPDATE_PRODUCT, payload: res.data.products });
